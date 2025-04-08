@@ -59,8 +59,6 @@ contract Presale is Ownable {
         currentPhase = 0;
 
         require(endTime > startTime && startTime >= block.timestamp, "Incorrect Presale Times");
-
-        IERC20(tokenAddress_).safeTransferFrom(msg.sender, address(this), maxSellingAmount);
     }
 
     /**
@@ -73,6 +71,10 @@ contract Presale is Ownable {
 
     function removeBlacklist(address user_) external onlyOwner {
         isBlacklisted[user_] = false;
+    }
+
+    function getPresaleTokens() external onlyOwner {
+        IERC20(tokenAddress).safeTransferFrom(msg.sender, address(this), maxSellingAmount);
     }
 
     function getETHPrice() public view returns (uint256 price){
@@ -121,12 +123,11 @@ contract Presale is Ownable {
         require(!isBlacklisted[msg.sender], "User is blacklisted");
         require(block.timestamp >= startTime && block.timestamp < endTime, "Presale hasn't started or has ended");
 
-
         uint256 ETHPrice = getETHPrice();
-        uint256 USDValue = msg.value * ETHPrice;
+        uint256 USDValue = msg.value * ETHPrice / 1e18;
         uint256 tokenPrice = phases[currentPhase][1];
-
         uint256 tokensToReceive = USDValue * 1e6 / tokenPrice; // 18 + 6 - 6 = 18 decimals
+       
         checkCurrentPhase();
 
         totalSold += tokensToReceive;
@@ -149,7 +150,7 @@ contract Presale is Ownable {
 
         delete userClaimableTokens[msg.sender];
 
-        IERC20(tokenAddress).safeTransferFrom(address(this), msg.sender, userTokens);
+        IERC20(tokenAddress).safeTransfer(msg.sender, userTokens);
 
         emit tokensClaimed(msg.sender, userTokens);
     }
