@@ -251,4 +251,26 @@ contract PresaleTest is Test {
 
         vm.stopPrank();
     }
+    
+    function test_revertClaimTokensNoTokens() public {
+        vm.startPrank(arbUser);        
+        
+        vm.expectRevert("No tokens bought");
+        presale.claimTokens();
+
+        vm.stopPrank();
+    }
+
+    function test_revertClaimTokensNotEnded() public {
+        vm.startPrank(arbUser);        
+        
+        uint256 purchaseAmount = 10 * 1e6; // 10 USDT
+        IERC20(USDT).approve(address(presale), purchaseAmount);
+        presale.buyPresaleWithStable(USDT, purchaseAmount);
+
+        vm.expectRevert("Presale hasn't ended");
+        presale.claimTokens();
+
+        vm.stopPrank();
+    }
 }
