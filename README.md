@@ -1,62 +1,77 @@
-# 🔄 SwapApp - Uniswap V2 Router Integration on Arbitrum One
+# 🚀 Presale Smart Contract
+
+This smart contract facilitates a token presale with support for **USDT**, **USDC**, and **ETH**. It allows buyers to purchase presale tokens during a defined time window across multiple pricing phases. The contract uses **Chainlink’s decentralized price feed** to fetch the real-time ETH price, ensuring accurate USD-value calculations for ETH contributions.
+
+## ✨ Key Features
+
+- 🧪 **Fully tested with Foundry**, achieving 98%+ line and statement coverage.  
+- 🔐 **Owner-managed** access and emergency controls.  
+- 📊 **Chainlink Data Feed Integration** for real-time ETH/USD pricing.  
+- 📈 **Phase-based pricing** with automatic progression based on time or token limits.  
+- ⚠️ **Blacklist support** to exclude specific addresses.  
+- 🎟️ **Token claiming** available post-sale.  
 
 
-HIGHLIGHT CHAINLINK INTEGRATION for eth price
+## ℹ️ How it Works
+
+When a user buys tokens during the presale, the contract first checks that the presale is active and the user is not blacklisted. If paying with ETH, it fetches the real-time ETH/USD price via Chainlink to calculate the token amount; for stablecoins (USDT/USDC), it uses the fixed price set for the current phase. The user's claimable tokens are recorded, funds are sent to the designated receiver, and an event is emitted. After the presale ends, users can claim their allocated tokens.
+
+![Presale Smart Contract Flow](./public/presaleDiagram.png)
 
 
-## 📌 Overview
-SwapApp is a Solidity smart contract that integrates Uniswap's V2 Router to enable seamless token swaps and liquidity management on the Arbitrum One mainnet. The contract supports swaps between ERC-20 tokens and ETH, as well as adding and removing liquidity from Uniswap pools.
+## 🧩 Contract Overview
 
-## 🔍 Contract
-
-- **Arbiscan:** [View and interact with the contract](https://arbiscan.io/address/0xA4b3f7783E1a48A5D06df273Ba00D7F6D40B0291#code) on Arbiscan.
+| Function                          | Description                                                                 |
+|----------------------------------|-----------------------------------------------------------------------------|
+| `buyPresaleWithStable()`         | Purchase tokens using USDT or USDC.                                        |
+| `buyPresaleWithETH()`            | Purchase tokens using ETH; price fetched via Chainlink.                    |
+| `claimTokens()`                  | Claim purchased tokens after presale ends.                                 |
+| `getETHPrice()`                  | Returns current ETH/USD price from Chainlink price feed.                   |
+| `getPresaleTokens()`             | Owner function to deposit tokens into the contract for distribution.       |
+| `checkCurrentPhase()`            | Private function to update the phase based on time or amount sold.         |
+| `blacklistUser()`                | Owner function to blacklist a user from participating.                     |
+| `removeBlacklist()`              | Owner function to remove a user from the blacklist.                        |
+| `emergencyWithdrawERC20()`      | Withdraw any ERC20 tokens from the contract (owner only).                  |
+| `emergencyWithdrawETH()`        | Withdraw ETH from the contract in case of emergency (owner only).          |
 
 ---
 
-## ✨ Key Features
-- **Uniswap V2 Integration**: Uses Uniswap V2 Router for decentralized swaps and liquidity management.
-- **100% Test Coverage**: Ensures reliability and security.
-- **Token-to-Token Swaps**: Swap one ERC-20 token for another.
-- **ETH to Token Swaps**: Convert ETH to ERC-20 tokens.
-- **Token to ETH Swaps**: Convert ERC-20 tokens to ETH.
-- **Add Liquidity**: Provide liquidity to Uniswap V2 pools and receive LP tokens.
-- **Remove Liquidity**: Withdraw liquidity from Uniswap V2 pools and receive corresponding tokens.
+## 📊  Testing Coverage (via `forge coverage`)
 
-## 📜 Contracts Overview
 
-| Contract  | Description |
-|-----------|------------|
-| `IV2Router` | Interface for interacting with Uniswap V2 Router functions. |
-| `IV2Factory` | Interface for interacting with Uniswap V2 Factory. |
-| `SwapApp` | Implements token swaps, ETH conversions, and liquidity management using Uniswap V2 Router. |
+| File                | % Lines        | % Statements   | % Branches     | % Functions     |
+|---------------------|----------------|----------------|----------------|-----------------|
+| `src/Presale.sol`   | 98.46% (64/65) | 98.53% (67/68) | 76.92% (20/26) | 100.00% (11/11) |
+| `test/Presale.t.sol`| 100.00% (2/2)  | 100.00% (1/1)  | 100.00% (0/0)  | 100.00% (1/1)   |
+| **Total**           | **98.51% (66/67)** | **98.55% (68/69)** | **76.92% (20/26)** | **100.00% (12/12)** |
 
-### ⚙️ `SwapApp.sol` Contract Functions
+---
 
-#### **Swaps**
-| Function | Description |
-|----------|------------|
-| `swapTokens(uint256 amountIn_, uint256 amountOutMin_, address[] memory path_, uint256 deadline_)` | Swaps ERC-20 tokens for another ERC-20 token. |
-| `swapETHForTokens(uint256 amountOutMin_, address[] memory path_, uint256 deadline_)` | Swaps ETH for ERC-20 tokens. |
-| `swapTokensForETH(uint256 amountIn_, uint256 amountOutMin_, address[] memory path_, uint256 deadline_)` | Swaps ERC-20 tokens for ETH. |
-| `getAmountOutHelper(uint256 amountIn_, address[] calldata path_)` | Helper function to fetch estimated output amount for a given input amount. |
+## 🛠 How to Use
 
-#### **Liquidity Management**
-| Function | Description |
-|----------|------------|
-| `addLiquidityWithTokenA(uint256 amountIn_, address[] memory path_, uint256 amountOutMin_, uint256 amountAMin_, uint256 amountBMin_, uint256 deadline_)` | Adds liquidity to Uniswap V2 pools using Token A. The function swaps half the input amount to Token B before adding liquidity. |
-| `removeLiquidity(address tokenA_, address tokenB_, uint256 amountAMin_, uint256 amountBMin_, uint256 deadline_)` | Removes liquidity from Uniswap V2 pools and returns the respective token amounts to the user. |
+### Deployment
 
-## 🚀 Getting Started
-1. Deploy `SwapApp` with the Uniswap V2 Router address on Arbitrum One.
-2. Ensure that users approve token transfers before swapping or adding liquidity.
-3. Call the relevant swap or liquidity function depending on the desired action.
+Deploy the contract with the following parameters:
 
-## 📝 Events
-| Event | Description |
-|----------|------------|
-| `tokenSwap(address indexed user, address indexed tokenIn, address indexed tokenOut, uint256 amountIn, uint256 amountOut)` | Emitted when a user swaps tokens. |
-| `ETHForTokensSwap(address indexed user, address indexed tokenOut, uint256 amountIn, uint256 amountOut)` | Emitted when a user swaps ETH for tokens. |
-| `tokensForETHSwap(address indexed user, address indexed tokenIn, uint256 amountIn, uint256 amountOut)` | Emitted when a user swaps tokens for ETH. |
-| `liquidityAdded(address indexed user, address tokenA, address tokenB, uint256 indexed liquidity)` | Emitted when liquidity is added to a Uniswap V2 pool. |
-| `liquidityRemoved(address indexed user, address indexed tokenA, address indexed tokenB, uint256 amountA, uint256 amountB)` | Emitted when liquidity is removed from a Uniswap V2 pool. |
+- `tokenAddress_`: ERC20 token being sold.
+- `dataFeedAddress_`: Chainlink ETH/USD price feed address.
+- `USDT_`, `USDC_`: Addresses for stablecoins.
+- `fundsReceiver_`: Address where funds will be sent.
+- `maxSellingAmount_`: Total tokens to be sold.
+- `phases_`: Array of `[amount, price, time]` for each sale phase.
+- `startTime_`, `endTime_`: Presale time window.
 
+### Purchasing Tokens
+
+- Use `buyPresaleWithStable(token, amount)` with USDT or USDC.
+- Use `buyPresaleWithETH()` to buy with ETH; real-time conversion via Chainlink.
+
+### Claiming Tokens
+
+- Call `claimTokens()` **after** the presale ends to retrieve purchased tokens.
+
+### Admin Functions
+
+- Use `getPresaleTokens()` to deposit the tokens being sold.
+- Use `blacklistUser()` or `removeBlacklist()` to manage participation.
+- Use emergency withdraw functions if necessary.
