@@ -1,5 +1,9 @@
 # 🔄 SwapApp - Uniswap V2 Router Integration on Arbitrum One
 
+
+HIGHLIGHT CHAINLINK INTEGRATION for eth price
+
+
 ## 📌 Overview
 SwapApp is a Solidity smart contract that integrates Uniswap's V2 Router to enable seamless token swaps and liquidity management on the Arbitrum One mainnet. The contract supports swaps between ERC-20 tokens and ETH, as well as adding and removing liquidity from Uniswap pools.
 
